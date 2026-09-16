@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useRef, useState } from 'react';
+import { FormEvent, useCallback, useRef, useState } from 'react';
 import clsx from 'clsx';
 
 import {
@@ -16,6 +16,9 @@ import { Button } from 'src/ui/button';
 import { RadioGroup } from 'src/ui/radio-group';
 import { Select } from 'src/ui/select';
 import { Separator } from 'src/ui/separator';
+import { Text } from 'src/ui/text';
+
+import { useOutsideClickClose } from './hooks/useOutsideClickClose';
 
 import styles from './ArticleParamsForm.module.scss';
 
@@ -24,32 +27,24 @@ type ArticleParamsFormProps = {
 };
 
 export const ArticleParamsForm = ({ onApply }: ArticleParamsFormProps) => {
-	const [isOpen, setIsOpen] = useState(false);
+	const [isArticleParamsFormOpen, setIsArticleParamsFormOpen] = useState(false);
 	const [formState, setFormState] = useState(defaultArticleState);
-	const rootRef = useRef<HTMLDivElement>(null);
+	const articleParamsFormContainerRef = useRef<HTMLDivElement>(null);
 
-	useEffect(() => {
-		if (!isOpen) {
-			return;
-		}
+	const handleCloseForm = useCallback(() => {
+		setIsArticleParamsFormOpen(false);
+	}, []);
 
-		const handleOutsideClick = (event: MouseEvent) => {
-			const { target } = event;
-
-			if (target instanceof Node && !rootRef.current?.contains(target)) {
-				setIsOpen(false);
-			}
-		};
-
-		window.addEventListener('mousedown', handleOutsideClick);
-
-		return () => {
-			window.removeEventListener('mousedown', handleOutsideClick);
-		};
-	}, [isOpen]);
+	useOutsideClickClose({
+		articleParamsFormContainerRef,
+		isArticleParamsFormOpen,
+		onArticleParamsFormClose: handleCloseForm,
+	});
 
 	const handleToggleForm = () => {
-		setIsOpen((currentIsOpen) => !currentIsOpen);
+		setIsArticleParamsFormOpen(
+			(currentIsArticleParamsFormOpen) => !currentIsArticleParamsFormOpen
+		);
 	};
 
 	const handleChange =
@@ -72,14 +67,24 @@ export const ArticleParamsForm = ({ onApply }: ArticleParamsFormProps) => {
 	};
 
 	return (
-		<div ref={rootRef}>
-			<ArrowButton isOpen={isOpen} onClick={handleToggleForm} />
+		<div ref={articleParamsFormContainerRef}>
+			<ArrowButton
+				isSidebarOpen={isArticleParamsFormOpen}
+				onClick={handleToggleForm}
+			/>
 			<aside
-				className={clsx(styles.container, { [styles.container_open]: isOpen })}>
+				className={clsx(styles.container, {
+					[styles.container_open]: isArticleParamsFormOpen,
+				})}>
 				<form
 					className={styles.form}
 					onSubmit={handleSubmit}
 					onReset={handleReset}>
+					<div className={styles.title}>
+						<Text as='h2' size={31} weight={800} uppercase>
+							Задайте параметры
+						</Text>
+					</div>
 					<Select
 						title='Шрифт'
 						selected={formState.fontFamilyOption}
