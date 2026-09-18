@@ -22,29 +22,32 @@ type SelectProps = {
 
 export const Select = (props: SelectProps) => {
 	const { options, placeholder, selected, onChange, onClose, title } = props;
-	const [isOpen, setIsOpen] = useState<boolean>(false);
-	const rootRef = useRef<HTMLDivElement>(null);
+	const [isSelectDropdownOpen, setIsSelectDropdownOpen] =
+		useState<boolean>(false);
+	const selectWrapperRef = useRef<HTMLDivElement>(null);
 	const placeholderRef = useRef<HTMLDivElement>(null);
 	const optionClassName = selected?.optionClassName ?? '';
 
 	useOutsideClickClose({
-		isOpen,
-		rootRef,
+		isSelectDropdownOpen,
+		selectWrapperRef,
 		onClose,
-		onChange: setIsOpen,
+		onChange: setIsSelectDropdownOpen,
 	});
 
 	useEnterSubmit({
 		placeholderRef,
-		onChange: setIsOpen,
+		onChange: setIsSelectDropdownOpen,
 	});
 
 	const handleOptionClick = (option: OptionType) => {
-		setIsOpen(false);
+		setIsSelectDropdownOpen(false);
 		onChange?.(option);
 	};
 	const handlePlaceHolderClick: MouseEventHandler<HTMLDivElement> = () => {
-		setIsOpen((isOpen) => !isOpen);
+		setIsSelectDropdownOpen(
+			(currentIsSelectDropdownOpen) => !currentIsSelectDropdownOpen
+		);
 	};
 
 	return (
@@ -58,8 +61,8 @@ export const Select = (props: SelectProps) => {
 			)}
 			<div
 				className={styles.selectWrapper}
-				ref={rootRef}
-				data-is-active={isOpen}
+				ref={selectWrapperRef}
+				data-is-active={isSelectDropdownOpen}
 				data-testid='selectWrapper'>
 				<img src={arrowDown} alt='иконка стрелочки' className={styles.arrow} />
 				<div
@@ -67,7 +70,6 @@ export const Select = (props: SelectProps) => {
 						styles.placeholder,
 						(styles as Record<string, string>)[optionClassName]
 					)}
-					data-status={status}
 					data-selected={!!selected?.value}
 					onClick={handlePlaceHolderClick}
 					role='button'
@@ -82,7 +84,7 @@ export const Select = (props: SelectProps) => {
 						{selected?.title || placeholder}
 					</Text>
 				</div>
-				{isOpen && (
+				{isSelectDropdownOpen && (
 					<ul className={styles.select} data-testid='selectDropdown'>
 						{options
 							.filter((option) => selected?.value !== option.value)

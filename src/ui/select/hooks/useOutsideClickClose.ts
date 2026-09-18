@@ -1,28 +1,31 @@
 import { useEffect } from 'react';
 
 type UseOutsideClickClose = {
-	isOpen: boolean;
+	isSelectDropdownOpen: boolean;
 	onChange: (newValue: boolean) => void;
 	onClose?: () => void;
-	rootRef: React.RefObject<HTMLDivElement>;
+	selectWrapperRef: React.RefObject<HTMLDivElement>;
 };
 
 export const useOutsideClickClose = ({
-	isOpen,
-	rootRef,
+	isSelectDropdownOpen,
+	selectWrapperRef,
 	onClose,
 	onChange,
 }: UseOutsideClickClose) => {
 	useEffect(() => {
 		const handleClick = (event: MouseEvent) => {
 			const { target } = event;
-			if (target instanceof Node && !rootRef.current?.contains(target)) {
-				isOpen && onClose?.();
+			if (
+				target instanceof Node &&
+				!selectWrapperRef.current?.contains(target)
+			) {
+				isSelectDropdownOpen && onClose?.();
 				onChange?.(false);
 			}
 		};
 
-		if (!isOpen) {
+		if (!isSelectDropdownOpen) {
 			return;
 		}
 
@@ -31,5 +34,5 @@ export const useOutsideClickClose = ({
 		return () => {
 			window.removeEventListener('mousedown', handleClick);
 		};
-	}, [onClose, onChange, isOpen]);
+	}, [onClose, onChange, isSelectDropdownOpen]);
 };
